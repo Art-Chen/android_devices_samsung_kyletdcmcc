@@ -1,0 +1,113 @@
+on early-init
+    start ueventd
+
+on init
+    export PATH /sbin:/system/sbin:/system/bin:/system/xbin
+    export LD_LIBRARY_PATH /system/lib
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    symlink /system/etc /etc
+
+    mkdir /emmc
+    mkdir /sdcard
+    mkdir /usbdisk
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mkdir /preload
+    mount /tmp /tmp tmpfs
+    
+    # usb
+    write /sys/class/android_usb/android0/f_rndis/wceis 1
+
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+    
+    # usb
+    write /sys/class/android_usb/android0/iManufacturer $ro.manufacturer
+    write /sys/class/android_usb/android0/iProduct $ro.model
+    write /sys/class/android_usb/android0/iSerial $ro.serialno
+    write /sys/class/android_usb/f_mass_storage/inquiry_string "Samsung"
+    write /sys/class/android_usb/f_mass_storage/vendor_string "SAMSUNG"
+    write /sys/class/android_usb/f_mass_storage/product_string "SGH-S7562"
+    
+    chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
+    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
+    
+    chown system system /sys/class/power_supply/battery/status
+    chown system system /sys/class/power_supply/battery/capacity
+    chmod 0444 /sys/class/power_supply/battery/status
+    chmod 0444 /sys/class/power_supply/battery/capacity
+    
+    setprop sys.usb.config $persist.sys.usb.config
+    
+service ueventd /sbin/ueventd
+    critical
+
+service recovery /sbin/recovery
+
+service adbd /sbin/adbd recovery
+    class core
+    disabled
+
+# fix reboot issue from recovery
+service fix_reboot /sbin/sh /sbin/fix_reboot.sh
+    user root
+    oneshot
+    
+on property:sys.usb.config=none
+    stop adbd
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/bDeviceClass 0
+    setprop sys.usb.state $sys.usb.config
+    
+on property:sys.usb.config=adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 04E8
+    write /sys/class/android_usb/android0/idProduct 685D
+    write /sys/class/android_usb/android0/f_diag/clients diag
+    write /sys/class/android_usb/android0/f_acm/acm_transports tty
+    write /sys/class/android_usb/android0/functions adb
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+    
+on property:sys.usb.config=mass_storage,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 04E8
+    write /sys/class/android_usb/android0/idProduct 685E
+    write /sys/class/android_usb/android0/f_diag/clients diag    
+    write /sys/class/android_usb/android0/f_acm/acm_transports tty
+    write /sys/class/android_usb/android0/functions mass_storage,adb
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state $sys.usb.config
+
+on property:sys.usb.config=mass_storage
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 04E8
+    write /sys/class/android_usb/android0/idProduct 685E
+    write /sys/class/android_usb/android0/f_diag/clients diag    
+    write /sys/class/android_usb/android0/f_acm/acm_transports tty
+    write /sys/class/android_usb/android0/functions mass_storage
+    write /sys/class/android_usb/android0/enable 1
+    setprop sys.usb.state $sys.usb.config
+
+on property:ro.debuggable=0
+    setprop sys.usb.config none
+
+on property:ro.debuggable=1
+    start adbd
+
+on property:service.adb.root=1
+    write /sys/class/android_usb/android0/enable 0
+    restart adbd
+    write /sys/class/android_usb/android0/enable 1
+    
