@@ -16,7 +16,7 @@ wifi.interface=wlan0
 wifi.supplicant_scan_interval=150
 
 ## Bluetooth
-#ro.bt.bdaddr_path=/data/misc/bluedroid/bdaddr
+ro.bt.bdaddr_path=/efs/bluetooth/bdaddr
 
 ## Display, graphics
 ro.sf.lcd_density=240
