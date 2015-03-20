@@ -47,15 +47,15 @@ PRODUCT_AAPT_PREF_CONFIG := hdpi
 PRODUCT_PACKAGES += \
     libnetcmdiface
 
-PRODUCT_PACKAGES += \
-    charger \
-    charger_res_images
+#PRODUCT_PACKAGES += \
+#    charger \
+#    charger_res_images
 
 # Misc Packages
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
-#    SamsungServiceMode \
-#    CMAccount \
+    SamsungServiceMode \
+    CMAccount \
     Torch
 
 # Filesystem management tools
