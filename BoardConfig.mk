@@ -14,16 +14,16 @@
 #
 # BoardConfig.mk
 #
--include vendor/samsung/kyletdopen/BoardConfigVendor.mk
+-include vendor/samsung/kyletdcmcc/BoardConfigVendor.mk
 
-USE_CAMERA_STUB := true
+USE_CAMERA_STUB := false
 ## Kernel, bootloader etc.
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 mem=239M
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 2048
-#TARGET_PREBUILT_KERNEL := device/samsung/kyletdcmcc/kernel
-TARGET_KERNEL_SOURCE := kernel/samsung/kyletdcmcc
-TARGET_KERNEL_CONFIG := kyletd-vlx_defconfig
+TARGET_PREBUILT_KERNEL := device/samsung/kyletdcmcc/kernel
+#TARGET_KERNEL_SOURCE := kernel/samsung/kyletdcmcc
+#TARGET_KERNEL_CONFIG := kyletd-vlx_defconfig
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
